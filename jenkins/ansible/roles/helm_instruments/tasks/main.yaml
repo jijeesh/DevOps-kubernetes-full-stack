@@ -1,0 +1,94 @@
+- name: Set up Helm and Tiller.
+      command: helm init --service-account tiller
+      register: helm_init_result
+      changed_when: "'already installed' not in helm_init_result.stdout"
+
+    - name: Get Tiller's ClusterIP.
+      k8s:
+        api_version: v1
+        kind: Service
+        name: tiller-deploy
+        namespace: kube-system
+      register: tiller_service
+
+    - name: Set the Helm host and port.
+      set_fact:
+        helm_host: "{{ tiller_service.result.spec.clusterIP }}"
+        helm_port: "{{ tiller_service.result.spec.ports[0].port }}"
+
+    - name: Wait for Tiller to become responsive.
+      wait_for:
+        host: '{{ helm_host }}'
+        port: '{{ helm_port }}'
+        state: started
+
+    - name: List installed Helm charts.
+      command: helm list
+      environment:
+        HELM_HOST: '{{ helm_host }}:{{ helm_port }}'
+      register: helm_list_results
+      changed_when: False
+
+# - include_tasks: 'Prometheus.yml'
+
+    - name: Install prometheus with Helm.
+      command: >
+        helm install --namespace monitoring --name prometheus stable/prometheus
+      environment:
+        HELM_HOST: '{{ helm_host }}:{{ helm_port }}'
+      when: "'prometheus' not in helm_list_results.stdout"
+
+    - name: Install grafana with Helm.
+      command: >
+        helm install --namespace monitoring --name grafana stable/grafana
+      environment:
+        HELM_HOST: '{{ helm_host }}:{{ helm_port }}'
+      when: "'grafana' not in helm_list_results.stdout"
+
+    - name: Install repo.
+      command: >
+        helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com/
+
+    - name: Install repo.
+      command: >
+        helm repo update
+
+    - name: Install elasticsearch with Helm.
+      command: >
+        helm install --namespace monitoring --name elasticsearch incubator/elasticsearch
+      environment:
+        HELM_HOST: '{{ helm_host }}:{{ helm_port }}'
+      when: "'elasticsearch' not in helm_list_results.stdout"
+
+    - name: Install fluentd with Helm.
+      command: >
+        helm install --namespace monitoring --name fluentd stable/fluentd-elasticsearch --set elasticsearch.host=elasticsearch-client.logging.svc.cluster.local,elasticsearch.port=9200
+      environment:
+        HELM_HOST: '{{ helm_host }}:{{ helm_port }}'
+      when: "'fluentd' not in helm_list_results.stdout"
+
+    - name: Install kibana with Helm.
+      command: >
+        helm install --namespace monitoring --name kibana stable/kibana --set env.ELASTICSEARCH_URL=http://elasticsearch-client.logging.svc.cluster.local:9200,env.SERVER_BASEPATH=/api/v1/namespaces/logging/services/kibana/proxy
+      environment:
+        HELM_HOST: '{{ helm_host }}:{{ helm_port }}'
+      when: "'kibana' not in helm_list_results.stdout"
+
+    - synchronize:
+        src: ../files/charts
+        dest: "$HOME/charts"
+        archive: yes
+
+    - name: Install istio-init with Helm.
+      command: >
+        helm install $HOME/charts/istio-init/ --name istio-init --namespace istio-system
+      environment:
+        HELM_HOST: '{{ helm_host }}:{{ helm_port }}'
+      when: "'istio-init' not in helm_list_results.stdout"
+
+    - name: Install istio with Helm.
+      command: >
+        helm install  $HOME/charts/istio/ --name istio --namespace istio-system
+      environment:
+        HELM_HOST: '{{ helm_host }}:{{ helm_port }}'
+      when: "'istio' not in helm_list_results.stdout"

@@ -1,0 +1,19 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: telemetry-gw-cert
+  namespace: istio-system
+spec:
+  secretName: telemetry-gw-cert
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer
+  commonName: istio.apps.k8s.nestgroup.net
+  dnsNames:
+  - istio.apps.k8s.nestgroup.net
+  acme:
+    config:
+    - http01:
+        ingressClass: istio
+      domains:
+      - istio.apps.k8s.nestgroup.net
