@@ -1,0 +1,37 @@
+
+    - name: Create a ext4 filesystem on /dev/xvdi
+      filesystem:
+        fstype: ext4
+        dev: /dev/xvdi
+
+    - name: Mount Jenkins Home Storage Devices
+      mount:
+        src=/dev/xvdi
+        path='{{ jenkins_directory }}'
+        fstype=ext4
+        opts="defaults"
+        state=mounted
+
+    - synchronize:
+        src: ../files/jenkins
+        dest: '{{ jenkins_directory }}/jenkins'
+        archive: yes
+      tags: [jenkins]
+
+
+
+    - name: Build an image and push it to a private repo
+      docker_image:
+        path: '{{ jenkins_directory }}/jenkins'
+        name: '{{jenkins_image}}'
+        tag: latest
+        push: no
+      tags: [jenkins]
+
+    - name: Container is running
+      docker_container:
+        name=jenkins
+        image='{{jenkins_image}}'
+        ports=8080:8080
+        volumes='{{ jenkins_directory }}/jenkins_home:/var/jenkins_home'
+      tags: [jenkins]

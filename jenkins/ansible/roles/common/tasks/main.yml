@@ -1,0 +1,42 @@
+- name: Update all packages to the latest version
+  apt:
+    upgrade: dist
+    update_cache: yes
+
+- name: Install required packages
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: no
+  with_items:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - software-properties-common
+    - ebtables
+    - ethtool
+    - jq
+
+# 
+# - name: Create a ext4 filesystem on /dev/xvdh
+#       filesystem:
+#          fstype: ext4
+#          dev: /dev/xvdh
+#
+# - name: Mount docker Storage Devices
+#   mount:
+#     src=/dev/xvdh
+#     path=/var/lib/docker
+#     fstype=ext4
+#     opts="defaults"
+#     state=mounted
+
+
+#
+# - name: Mount up device by UUID
+#   mount:
+#     path: /data
+#     src: /dev/xvdh
+#     fstype: ext4
+#     opts: noatime
+#     state: present

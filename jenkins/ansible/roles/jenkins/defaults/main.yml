@@ -1,0 +1,2 @@
+jenkins_directory: /jenkins
+jenkins_image: 'jenkins/jenkins:lts'

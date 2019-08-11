@@ -1,0 +1,14 @@
+- hosts: test
+  remote_user: ubuntu
+  become: yes
+  gather_facts: true
+  pre_tasks:
+    - import_role:
+        name: ../ansible/roles/gather_facts
+  tasks:
+    - import_role:
+        name: ../ansible/roles/common
+    - import_role:
+        name: ../ansible/roles/docker
+    # - import_role:
+    #     name: ../ansible/roles/jenkins
