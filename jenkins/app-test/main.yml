@@ -10,5 +10,9 @@
         name: ../ansible/roles/common
     - import_role:
         name: ../ansible/roles/docker
-    # - import_role:
-    #     name: ../ansible/roles/jenkins
+    - import_role:
+        name: ../ansible/roles/kubectl
+    - import_role:
+        name: ../ansible/roles/helm
+    - import_role:
+        name: ../ansible/roles/jenkins

@@ -1,2 +1,4 @@
 jenkins_directory: /jenkins
 jenkins_image: 'jenkins/jenkins:lts'
+admin_user: "admin"
+admin_password: "admin

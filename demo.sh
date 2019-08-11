@@ -35,11 +35,12 @@ function kubernetes() {
   cd kubespray
   ansible-playbook -i ./inventory/hosts ./cluster.yml \
    -e ansible_user=core -e bootstrap_os=coreos \
+   -e kubeconfig_localhost=true \
    -e kube_network_plugin=cilium -b --become-user=root \
    --flush-cache  \
    -e ansible_ssh_private_key_file=~/.ssh/MyKeyPair.pem
+  cp inventory/artifacts/admin.conf ../jenkins/ansible/roles/jenkins/files/admin.conf
 }
-
-jenkins
 kubernetes-infrastructure
 kubernetes
+jenkins

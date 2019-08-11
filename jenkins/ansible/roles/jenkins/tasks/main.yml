@@ -1,4 +1,9 @@
 
+    - name: Transfer file to jenkins server
+      copy:
+        src: admin.conf
+        dest: $HOME/.kube/config
+
     - name: Create a ext4 filesystem on /dev/xvdi
       filesystem:
         fstype: ext4
@@ -30,8 +35,16 @@
 
     - name: Container is running
       docker_container:
-        name=jenkins
-        image='{{jenkins_image}}'
-        ports=8080:8080
-        volumes='{{ jenkins_directory }}/jenkins_home:/var/jenkins_home'
+        name: jenkins
+        image: '{{jenkins_image}}'
+        ports:
+          - "8080:8080"
+        volumes:
+          - '{{ jenkins_directory }}/jenkins_home:/var/jenkins_home'
+          - /usr/local/bin/kubectl:/usr/bin/kubectl
+          - /usr/local/bin/helm:/usr/bin/helm
+          - $HOME/.kube/config:$HOME/.kube/config
+        env:
+          ADMIN_USER: "{{admin_user}}"
+          ADMIN_PASSWORD: "{{admin_password}}"
       tags: [jenkins]
