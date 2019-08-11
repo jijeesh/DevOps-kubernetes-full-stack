@@ -94,3 +94,9 @@ You should see that nodes are in Ready state and Cilium pods are in Running stat
 cd contrib/terraform/aws
 terraform destroy
 ```
+wrapper script demo.sh will install all this steps using ansible
+
+```
+./demo.sh
+
+```

@@ -13,6 +13,10 @@
     - import_role:
         name: ../ansible/roles/kubectl
     - import_role:
+        name: ../ansible/roles/guestbook
+    - import_role:
         name: ../ansible/roles/helm
+    - import_role:
+        name: ../ansible/roles/helm_instruments
     - import_role:
         name: ../ansible/roles/jenkins

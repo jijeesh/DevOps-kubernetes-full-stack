@@ -1,0 +1,12 @@
+    - synchronize:
+        src: ../files/guestbook-all-in-one.yaml
+        dest: "$HOME/guestbook-all-in-one.yaml"
+        archive: yes
+
+    - name: create namespace development with kubectl.
+      command: >
+        kubectl create ns  development
+
+    - name: Install guestbook with kubectl.
+      command: >
+        kubectl -n  development apply -f $HOME/guestbook-all-in-one.yaml
